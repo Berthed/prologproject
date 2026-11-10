@@ -14,6 +14,30 @@ ataque_pouco_efetivo(eletrico, dragao).
 
 ataque_sem_efeito(eletrico, terra).
 
+% Metal
+
+ataque_super_efetivo(metal, fada).
+ataque_super_efetivo(metal, gelo).
+ataque_super_efetivo(metal, pedra).
+
+ataque_pouco_efetivo(metal, fogo).
+ataque_pouco_efetivo(metal, agua).
+ataque_pouco_efetivo(metal, eletrico).
+ataque_pouco_efetivo(metal, metal).
+
+% Terra 
+
+ataque_super_efetivo(terra, metal).
+ataque_super_efetivo(terra, eletrico).
+ataque_super_efetivo(terra, fogo).
+ataque_super_efetivo(terra, pedra).
+ataque_super_efetivo(terra, veneno).
+
+ataque_pouco_efetivo(terra, planta).
+ataque_pouco_efetivo(terra, inseto).
+
+ataque_sem_efeito(terra, voador).
+
 %==========================================================================
 % INFERÊNCIAS/CÁLCULOS DE TIPO:
 %==========================================================================
@@ -33,6 +57,7 @@ efetividade_individual(_, _, neutro).
 
 % Combinação de tipos
 
+% Imunidade
 combinar(sem_efeito, _, sem_efeito) :- !.
 combinar(_, sem_efeito, sem_efeito) :- !.
 
@@ -57,14 +82,74 @@ combinar(neutro, pouco_efetivo, pouco_efetivo).
 % Pouco efetivo + pouco efetivo
 combinar(pouco_efetivo, pouco_efetivo, muito_pouco_efetivo).
 
-% Cálculo final
+% Cálculo final de ataque
 
 resultado_ataque(A, T1, T2, Resultado) :-
-efetividade_individual(A, T1, E1),
-efetividade_individual(A, T2, E2),
-combinar(E1, E2, Resultado).
+    efetividade_individual(A, T1, E1),
+    efetividade_individual(A, T2, E2),
+    combinar(E1, E2, Resultado).
 
 % Pokémon de tipo único
 
 resultado_ataque(A, T, Resultado) :-
 efetividade_individual(A, T, Resultado).
+
+% ==========================================================
+% CONTADOR DE VANTAGENS
+% ==========================================================
+
+% Contagem de vantagens ofensivas
+
+contar_vantagens(Tipo, Total) :-
+    findall(
+        Alvo,
+        ataque_super_efetivo(Tipo, Alvo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de fraquzas defensivas
+
+contar_fraquezas(Tipo, Total) :-
+    findall(
+        Ataque,
+        ataque_super_efetivo(Ataque, Tipo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de imunidades ofensivas
+
+contar_imunidades_ofensivas(Tipo, Total) :-
+    findall(
+        Alvo,
+        ataque_sem_efeito(Tipo, Alvo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de imunidades defensivas
+
+contar_imunidades_defensivas(Tipo, Total) :-
+    findall(
+        Ataque,
+        ataque_sem_efeito(Ataque, Tipo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% ==========================================================
+% RELATORIO COMPLETO
+% ==========================================================
+
+relatorio_tipo(Tipo) :-
+    contar_vantagens(Tipo, Vantagens),
+    contar_fraquezas(Tipo, Fraquezas),
+    contar_imunidades_ofensivas(Tipo, ImunidadesO),
+    contar_imunidades_defensivas(Tipo, ImunidadesD),
+
+    write('Tipo: '), write(Tipo), nl,
+    write('Vantagens ofensivas: '), write(Vantagens), nl,
+    write('Fraquezas defensivas: '), write(Fraquezas), nl,
+    write('Imunidades ofensivas: '), write(ImunidadesO), nl,
+    write('Imunidades defensivas: '), write(ImunidadesD), nl.
