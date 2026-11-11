@@ -1,4 +1,3 @@
-
 %==========================================================================
 % FATOS/TIPOS:
 %==========================================================================
@@ -164,51 +163,96 @@ ataque_pouco_efetivo(fada, fogo).
 ataque_pouco_efetivo(fada, veneno).
 ataque_pouco_efetivo(fada, metal).
 
+% Normal
+
+ataque_pouco_efetivo(normal, pedra).
+ataque_pouco_efetivo(normal, metal).
+
+ataque_sem_efeito(normal, fantasma).
+
+% Psíquico
+
+ataque_super_efetivo(psiquico, lutador).
+ataque_super_efetivo(psiquico, veneno).
+
+ataque_pouco_efetivo(psiquico, psiquico).
+ataque_pouco_efetivo(psiquico, metal).
+
+ataque_sem_efeito(psiquico, sombrio).
+
+% Veneno
+
+ataque_super_efetivo(veneno, grama).
+ataque_super_efetivo(veneno, fada).
+
+ataque_pouco_efetivo(veneno, veneno).
+ataque_pouco_efetivo(veneno, terra).
+ataque_pouco_efetivo(veneno, pedra).
+ataque_pouco_efetivo(veneno, fantasma).
+
+ataque_sem_efeito(veneno, metal).
+
+% Sombrio
+
+ataque_super_efetivo(sombrio, psiquico).
+ataque_super_efetivo(sombrio, fantasma).
+
+ataque_pouco_efetivo(sombrio, lutador).
+ataque_pouco_efetivo(sombrio, sombrio).
+ataque_pouco_efetivo(sombrio, fada).
+
 %==========================================================================
-% INFERÊNCIAS/CÁLCULOS DE TIPO:
+% INFERENCIAS/CALCULOS DE TIPO:
 %==========================================================================
 
 % Efetividade individual
 
 efetividade_individual(A, T, sem_efeito) :-
-ataque_sem_efeito(A, T), !.
+    ataque_sem_efeito(A, T), !.
 
 efetividade_individual(A, T, super_efetivo) :-
-ataque_super_efetivo(A, T), !.
+    ataque_super_efetivo(A, T), !.
 
 efetividade_individual(A, T, pouco_efetivo) :-
-ataque_pouco_efetivo(A, T), !.
+    ataque_pouco_efetivo(A, T), !.
 
 efetividade_individual(_, _, neutro).
 
 % Combinação de tipos
 
 % Imunidade
+
 combinar(sem_efeito, _, sem_efeito) :- !.
 combinar(_, sem_efeito, sem_efeito) :- !.
 
 % Super efetivo + super efetivo
+
 combinar(super_efetivo, super_efetivo, muito_efetivo).
 
 % Super efetivo + neutro
+
 combinar(super_efetivo, neutro, super_efetivo).
 combinar(neutro, super_efetivo, super_efetivo).
 
 % Super efetivo + pouco efetivo
+
 combinar(super_efetivo, pouco_efetivo, neutro).
 combinar(pouco_efetivo, super_efetivo, neutro).
 
 % Neutro + neutro
+
 combinar(neutro, neutro, neutro).
 
 % Pouco efetivo + neutro
+
 combinar(pouco_efetivo, neutro, pouco_efetivo).
 combinar(neutro, pouco_efetivo, pouco_efetivo).
 
 % Pouco efetivo + pouco efetivo
+
 combinar(pouco_efetivo, pouco_efetivo, muito_pouco_efetivo).
 
-% Cálculo final de ataque
+% Cálculo final de ataque contra dois tipos
 
 resultado_ataque(A, T1, T2, Resultado) :-
     efetividade_individual(A, T1, E1),
@@ -218,13 +262,11 @@ resultado_ataque(A, T1, T2, Resultado) :-
 % Pokémon de tipo único
 
 resultado_ataque(A, T, Resultado) :-
-efetividade_individual(A, T, Resultado).
+    efetividade_individual(A, T, Resultado).
 
-% ==========================================================
+%==========================================================================
 % CONTADOR DE VANTAGENS
-% ==========================================================
-
-
+%==========================================================================
 
 % Contagem de vantagens ofensivas
 
@@ -236,27 +278,7 @@ contar_vantagens(Tipo, Total) :-
     ),
     length(Lista, Total).
 
-% Contagem de fraquezas ofensivas
-
-contar_fraquezas_ofensivas(Tipo, Total) :-
-    findall(
-        Alvo,
-        ataque_pouco_efetivo(Tipo, Alvo),
-        Lista
-    ),
-    length(Lista, Total).
-
-% Contagem de vantagens defensivas
-
-contar_vantagens_defensivas(Tipo, Total) :-
-    findall(
-        Ataque,
-        ataque_pouco_efetivo(Ataque, Tipo),
-        Lista
-    ),
-    length(Lista, Total).
-
-% Contagem de fraquzas defensivas
+% Contagem de fraquezas defensivas
 
 contar_fraquezas(Tipo, Total) :-
     findall(
@@ -286,9 +308,99 @@ contar_imunidades_defensivas(Tipo, Total) :-
     ),
     length(Lista, Total).
 
-% ==========================================================
+% Contagem de fraquezas ofensivas
+
+contar_fraquezas_ofensivas(Tipo, Total) :-
+    findall(
+        Alvo,
+        ataque_pouco_efetivo(Tipo, Alvo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de vantagens defensivas
+
+contar_vantagens_defensivas(Tipo, Total) :-
+    findall(
+        Ataque,
+        ataque_pouco_efetivo(Ataque, Tipo),
+        Lista
+    ),
+    length(Lista, Total).
+
+%==========================================================================
+% CONTADORES COMBINADOS
+%==========================================================================
+
+% Identificação dos tipos atacantes cadastrados
+
+tipos_atacantes_cadastrados(Tipos) :-
+    findall(
+        Ataque,
+        (
+            ataque_super_efetivo(Ataque, _);
+            ataque_pouco_efetivo(Ataque, _);
+            ataque_sem_efeito(Ataque, _)
+        ),
+        Lista
+    ),
+    sort(Lista, Tipos).
+
+% Contagem de fraquezas defensivas combinadas
+
+contar_fraquezas_combinadas(Tipo1, Tipo2, Total) :-
+    tipos_atacantes_cadastrados(Tipos),
+    findall(
+        Ataque,
+        (
+            member(Ataque, Tipos),
+            resultado_ataque(Ataque, Tipo1, Tipo2, Resultado),
+            (
+                Resultado = super_efetivo;
+                Resultado = muito_efetivo
+            )
+        ),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de vantagens defensivas combinadas
+
+contar_vantagens_combinadas(Tipo1, Tipo2, Total) :-
+    tipos_atacantes_cadastrados(Tipos),
+    findall(
+        Ataque,
+        (
+            member(Ataque, Tipos),
+            resultado_ataque(Ataque, Tipo1, Tipo2, Resultado),
+            (
+                Resultado = pouco_efetivo;
+                Resultado = muito_pouco_efetivo
+            )
+        ),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de imunidades defensivas combinadas
+
+contar_imunidades_combinadas(Tipo1, Tipo2, Total) :-
+    tipos_atacantes_cadastrados(Tipos),
+    findall(
+        Ataque,
+        (
+            member(Ataque, Tipos),
+            resultado_ataque(Ataque, Tipo1, Tipo2, sem_efeito)
+        ),
+        Lista
+    ),
+    length(Lista, Total).
+
+%==========================================================================
 % RELATORIO COMPLETO
-% ==========================================================
+%==========================================================================
+
+% Relatório de um tipo
 
 relatorio_tipo(Tipo) :-
     contar_vantagens(Tipo, Vantagens),
@@ -305,3 +417,47 @@ relatorio_tipo(Tipo) :-
     write('Imunidades defensivas: '), write(ImunidadesD), nl,
     write('Fraquezas ofensivas: '), write(FraquezasO), nl,
     write('Vantagens defensivas: '), write(VantagensD), nl.
+
+% Relatório de dois tipos combinados
+
+relatorio_tipo(Tipo1, Tipo2) :-
+
+    contar_vantagens(Tipo1, Vantagens1),
+    contar_vantagens(Tipo2, Vantagens2),
+
+    contar_fraquezas_ofensivas(Tipo1, FraquezasO1),
+    contar_fraquezas_ofensivas(Tipo2, FraquezasO2),
+
+    contar_imunidades_ofensivas(Tipo1, ImunidadesO1),
+    contar_imunidades_ofensivas(Tipo2, ImunidadesO2),
+
+    contar_fraquezas_combinadas(Tipo1, Tipo2, FraquezasD),
+    contar_vantagens_combinadas(Tipo1, Tipo2, VantagensD),
+    contar_imunidades_combinadas(Tipo1, Tipo2, ImunidadesD),
+
+    write('Tipos combinados: '),
+    write(Tipo1), write('/'), write(Tipo2), nl,
+
+    write('Vantagens ofensivas: '),
+    write(Tipo1), write(' = '), write(Vantagens1),
+    write(' | '),
+    write(Tipo2), write(' = '), write(Vantagens2), nl,
+
+    write('Fraquezas ofensivas: '),
+    write(Tipo1), write(' = '), write(FraquezasO1),
+    write(' | '),
+    write(Tipo2), write(' = '), write(FraquezasO2), nl,
+
+    write('Imunidades ofensivas: '),
+    write(Tipo1), write(' = '), write(ImunidadesO1),
+    write(' | '),
+    write(Tipo2), write(' = '), write(ImunidadesO2), nl,
+
+    write('Fraquezas defensivas combinadas: '),
+    write(FraquezasD), nl,
+
+    write('Vantagens defensivas combinadas: '),
+    write(VantagensD), nl,
+
+    write('Imunidades defensivas combinadas: '),
+    write(ImunidadesD), nl.
