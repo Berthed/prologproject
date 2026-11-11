@@ -1,3 +1,4 @@
+
 %==========================================================================
 % FATOS/TIPOS:
 %==========================================================================
@@ -223,12 +224,34 @@ efetividade_individual(A, T, Resultado).
 % CONTADOR DE VANTAGENS
 % ==========================================================
 
+
+
 % Contagem de vantagens ofensivas
 
 contar_vantagens(Tipo, Total) :-
     findall(
         Alvo,
         ataque_super_efetivo(Tipo, Alvo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de fraquezas ofensivas
+
+contar_fraquezas_ofensivas(Tipo, Total) :-
+    findall(
+        Alvo,
+        ataque_pouco_efetivo(Tipo, Alvo),
+        Lista
+    ),
+    length(Lista, Total).
+
+% Contagem de vantagens defensivas
+
+contar_vantagens_defensivas(Tipo, Total) :-
+    findall(
+        Ataque,
+        ataque_pouco_efetivo(Ataque, Tipo),
         Lista
     ),
     length(Lista, Total).
@@ -272,9 +295,13 @@ relatorio_tipo(Tipo) :-
     contar_fraquezas(Tipo, Fraquezas),
     contar_imunidades_ofensivas(Tipo, ImunidadesO),
     contar_imunidades_defensivas(Tipo, ImunidadesD),
+    contar_fraquezas_ofensivas(Tipo, FraquezasO),
+    contar_vantagens_defensivas(Tipo, VantagensD),
 
     write('Tipo: '), write(Tipo), nl,
     write('Vantagens ofensivas: '), write(Vantagens), nl,
     write('Fraquezas defensivas: '), write(Fraquezas), nl,
     write('Imunidades ofensivas: '), write(ImunidadesO), nl,
-    write('Imunidades defensivas: '), write(ImunidadesD), nl.
+    write('Imunidades defensivas: '), write(ImunidadesD), nl,
+    write('Fraquezas ofensivas: '), write(FraquezasO), nl,
+    write('Vantagens defensivas: '), write(VantagensD), nl.
