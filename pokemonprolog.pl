@@ -201,6 +201,62 @@ ataque_pouco_efetivo(sombrio, lutador).
 ataque_pouco_efetivo(sombrio, sombrio).
 ataque_pouco_efetivo(sombrio, fada).
 
+% ==========================================================
+% CADASTRO DE POKEMON
+% ==========================================================
+
+% Time A - pode ser usado em diferentes combinações mas de exemplo ta assim
+pokemon(charizard, [fogo, voador]).
+pokemon(blastoise, [agua]).
+pokemon(venusaur, [grama, veneno]).
+pokemon(gengar, [fantasma, veneno]).
+pokemon(dragonite, [dragao, voador]).
+pokemon(machamp, [lutador]).
+% Time B - mesma coisa que o outro, pode usar em outros
+pokemon(gyarados, [agua, voador]).
+pokemon(tyranitar, [pedra, sombrio]).
+pokemon(scizor, [inseto, metal]).
+pokemon(alakazam, [psiquico]).
+pokemon(arcanine, [fogo]).
+pokemon(mamoswine, [gelo, terra]).
+
+% ==========================================================
+% CADASTRO DOS TIMES
+% ==========================================================
+
+% cadastro predefinidos de equipes dando o nome e pokemons
+
+time(time_a, [
+    charizard,
+    blastoise,
+    venusaur,
+    gengar,
+    dragonite,
+    machamp
+]).
+
+time(time_b, [
+    gyarados,
+    tyranitar,
+    scizor,
+    alakazam,
+    arcanine,
+    mamoswine
+]).
+
+% ==========================================================
+% PONTUACAO DE EFETIVIDADE
+% ==========================================================
+
+% conversor de pontos
+
+pontuacao(super_efetivo, 2).
+pontuacao(muito_efetivo, 4).
+pontuacao(neutro, 0).
+pontuacao(pouco_efetivo, -2).
+pontuacao(muito_pouco_efetivo, -4).
+pontuacao(sem_efeito, -5).
+
 %==========================================================================
 % INFERENCIAS/CALCULOS DE TIPO:
 %==========================================================================
@@ -254,15 +310,326 @@ combinar(pouco_efetivo, pouco_efetivo, muito_pouco_efetivo).
 
 % Cálculo final de ataque contra dois tipos
 
-resultado_ataque(A, T1, T2, Resultado) :-
+resultado_ataque(A, [T1, T2], Resultado) :-
     efetividade_individual(A, T1, E1),
     efetividade_individual(A, T2, E2),
     combinar(E1, E2, Resultado).
 
 % Pokémon de tipo único
 
-resultado_ataque(A, T, Resultado) :-
+resultado_ataque(A, [T], Resultado) :-
     efetividade_individual(A, T, Resultado).
+
+% ==========================================================
+% MELHOR PONTUACAO OFENSIVA
+% ==========================================================
+
+% a melhor pontuação ofensiva de um Pokémon contra outro Pokémon com maxlist q pega o de melhor tipo
+
+melhor_ataque(PokemonA, PokemonB, MelhorPontuacao) :-
+
+    pokemon(PokemonA, TiposA),
+    pokemon(PokemonB, TiposB),
+
+    findall(
+        Pontos,
+        (
+            member(TipoAtaque, TiposA),
+
+            resultado_ataque(
+                TipoAtaque,
+                TiposB,
+                Resultado
+            ),
+
+            pontuacao(Resultado, Pontos)
+        ),
+        Pontuacoes
+    ),
+
+    max_list(Pontuacoes, MelhorPontuacao).
+
+% ==========================================================
+% VANTAGEM ENTRE DOIS POKEMON
+% ==========================================================
+
+% compara a pontuação de cada e retorna a diferença entre elas
+
+vantagem_confronto(PokemonA, PokemonB, Pontos) :-
+
+    melhor_ataque(
+        PokemonA,
+        PokemonB,
+        PontosA
+    ),
+
+    melhor_ataque(
+        PokemonB,
+        PokemonA,
+        PontosB
+    ),
+
+    Pontos is PontosA - PontosB.
+
+% ==========================================================
+% PONTUACAO INDIVIDUAL
+% ==========================================================
+
+% calcula a pontuação em relação aos outros 6 e depois soma a de seus 6 em total
+
+pontuacao_pokemon(Pokemon, TimeAdversario, Total) :-
+
+    findall(
+        Pontos,
+        (
+            member(Oponente, TimeAdversario),
+            vantagem_confronto(
+                Pokemon,
+                Oponente,
+                Pontos
+            )
+        ),
+        Pontuacoes
+    ),
+
+    sum_list(Pontuacoes, Total).
+
+% ==========================================================
+% PONTUACAO DO TIME
+% ==========================================================
+
+% usa a individual para cada
+
+pontuacao_time(Time, TimeAdversario, Total) :-
+
+    findall(
+        Pontos,
+        (
+            member(Pokemon, Time),
+            pontuacao_pokemon(
+                Pokemon,
+                TimeAdversario,
+                Pontos
+            )
+        ),
+        Pontuacoes
+    ),
+
+    sum_list(Pontuacoes, Total).
+
+% ==========================================================
+% VALIDACAO DOS TIMES
+% ==========================================================
+
+% 6 pokemons unicos, cadastrados
+
+validar_time(Time) :-
+
+    is_list(Time),
+
+    length(Time, 6),
+
+    sort(Time, Unicos),
+
+    length(Unicos, 6),
+
+    forall(
+        member(Pokemon, Time),
+        pokemon(Pokemon, _)
+    ).
+
+% ==========================================================
+% RELATORIO DE PONTUACAO INDIVIDUAL
+% ==========================================================
+
+relatorio_pokemon([], _).
+relatorio_pokemon([Pokemon | Resto], Adversarios) :-
+    pontuacao_pokemon(
+        Pokemon,
+        Adversarios,
+        Pontos
+    ),
+    write(Pokemon),
+    write(': '),
+    write(Pontos),
+    write(' pontos'),
+    nl,
+    relatorio_pokemon(Resto, Adversarios).
+
+% ==========================================================
+% FRAQUEZAS RECORRENTES DO TIME
+% ==========================================================
+
+% contra determinado tipo de ataque.
+
+contar_fraquezas_time(Time, TipoAtaque, Total, PokemonFracos) :-
+
+    findall(
+        Pokemon,
+        (
+            member(Pokemon, Time),
+            pokemon(Pokemon, Tipos),
+            resultado_ataque(
+                TipoAtaque,
+                Tipos,
+                Resultado
+            ),
+            (
+                Resultado = super_efetivo;
+                Resultado = muito_efetivo
+            )
+        ),
+        Lista
+    ),
+
+    sort(Lista, PokemonFracos),
+    length(PokemonFracos, Total).
+
+
+% gera uma lista com as fraquezas
+
+listar_fraquezas_time(Time, Fraquezas) :-
+    tipos_atacantes_cadastrados(Tipos),
+    findall(
+        Total-Tipo-PokemonFracos,
+        (
+            member(Tipo, Tipos),
+            contar_fraquezas_time(
+                Time,
+                Tipo,
+                Total,
+                PokemonFracos
+            ),
+            Total > 0
+        ),
+        Lista
+    ),
+
+    keysort(Lista, ListaOrdenada),
+    reverse(ListaOrdenada, Fraquezas).
+
+% exibe o relatório de fraquezas recorrentes.
+
+relatorio_fraquezas_time(Time) :-
+    listar_fraquezas_time(Time, Fraquezas),
+
+    nl,
+    write('===== FRAQUEZAS MAIS RECORRENTES ====='),
+    nl,
+    nl,
+
+    (
+        Fraquezas = []
+        ->
+        write('Nenhuma fraqueza identificada.'), nl
+
+        ;
+
+        exibir_fraquezas(Fraquezas)
+    ).
+
+
+% exibe cada fraqueza encontrada
+
+exibir_fraquezas([]).
+exibir_fraquezas([Total-Tipo-Pokemon | Resto]) :-
+    write(Total),
+    write(' Pokemon vulneraveis a '),
+    write(Tipo),
+    write(': '),
+    write(Pokemon),
+    nl,
+    exibir_fraquezas(Resto).
+
+% ==========================================================
+% COMPARACAO FINAL DOS TIMES
+% ==========================================================
+
+% principal inferencia basicamente retorna a pontuação dos 6 de cada, a diferença e o vencedor
+
+analisar_times(NomeA, TimeA, NomeB, TimeB) :-
+    validar_time(TimeA),
+    validar_time(TimeB),
+    pontuacao_time(TimeA, TimeB, TotalA),
+    pontuacao_time(TimeB, TimeA, TotalB),
+
+    Diferenca is TotalA - TotalB,
+
+    nl,
+    write('========== ANALISE DOS TIMES =========='),
+    nl,
+
+    nl,
+    write('TIME A: '),
+    write(NomeA),
+    nl,
+
+    relatorio_pokemon(TimeA, TimeB),
+
+    write('Pontuacao total: '),
+    write(TotalA),
+    nl,
+
+    relatorio_fraquezas_time(TimeA),
+
+    nl,
+    write('========== ANALISE DOS TIMES =========='),
+    nl,
+    nl,
+    write('TIME B: '),
+    write(NomeB),
+    nl,
+
+    relatorio_pokemon(TimeB, TimeA),
+
+    write('Pontuacao total: '),
+    write(TotalB),
+    nl,
+
+    relatorio_fraquezas_time(TimeB),
+
+    nl,
+    write('========== RESULTADO FINAL =========='),
+    nl,
+    nl,
+
+    write('Diferenca: '),
+    write(Diferenca),
+    write(' pontos'),
+    nl,
+
+    (
+        TotalA > TotalB
+        ->
+        write('Time vencedor: '),
+        write(NomeA),
+        nl
+
+        ;
+
+        TotalB > TotalA
+        ->
+        write('Time vencedor: '),
+        write(NomeB),
+        nl
+
+        ;
+
+        write('Resultado: Empate!'),
+        nl
+    ).
+
+
+% ==========================================================
+% CONSULTA UTILIZANDO TIMES CADASTRADOS
+% ==========================================================
+
+% inferencia que chama com equipes predefinidas
+
+comparar_times(NomeA, NomeB) :-
+    time(NomeA, TimeA),
+    time(NomeB, TimeB),
+    analisar_times(NomeA, TimeA, NomeB, TimeB).
 
 %==========================================================================
 % CONTADOR DE VANTAGENS
@@ -354,7 +721,7 @@ contar_fraquezas_combinadas(Tipo1, Tipo2, Total) :-
         Ataque,
         (
             member(Ataque, Tipos),
-            resultado_ataque(Ataque, Tipo1, Tipo2, Resultado),
+            resultado_ataque(Ataque, [Tipo1, Tipo2], Resultado),
             (
                 Resultado = super_efetivo;
                 Resultado = muito_efetivo
@@ -372,7 +739,7 @@ contar_vantagens_combinadas(Tipo1, Tipo2, Total) :-
         Ataque,
         (
             member(Ataque, Tipos),
-            resultado_ataque(Ataque, Tipo1, Tipo2, Resultado),
+            resultado_ataque(Ataque, [Tipo1, Tipo2], Resultado),
             (
                 Resultado = pouco_efetivo;
                 Resultado = muito_pouco_efetivo
@@ -390,7 +757,7 @@ contar_imunidades_combinadas(Tipo1, Tipo2, Total) :-
         Ataque,
         (
             member(Ataque, Tipos),
-            resultado_ataque(Ataque, Tipo1, Tipo2, sem_efeito)
+            resultado_ataque(Ataque, [Tipo1, Tipo2], sem_efeito)
         ),
         Lista
     ),
