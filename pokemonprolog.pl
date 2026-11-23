@@ -421,7 +421,7 @@ pontuacao_time(Time, TimeAdversario, Total) :-
 % VALIDACAO DOS TIMES
 % ==========================================================
 
-% 6 pokemons unicos, cadastrados
+% 6 pokemons unicos
 
 validar_time(Time) :-
 
@@ -432,11 +432,6 @@ validar_time(Time) :-
     sort(Time, Unicos),
 
     length(Unicos, 6),
-
-    forall(
-        member(Pokemon, Time),
-        pokemon(Pokemon, _)
-    ).
 
 % ==========================================================
 % RELATORIO DE PONTUACAO INDIVIDUAL
