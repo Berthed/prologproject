@@ -1,117 +1,172 @@
+:- initialization(main).
+main :- analisar_times(
+    timea,
+    [
+        [fogo, voador],
+        [agua],
+        [grama, veneno],
+        [fantasma, veneno],
+        [dragao, voador],
+        [lutador]
+    ],
+    timeb,
+    [
+        [agua, voador],
+        [pedra, sombrio],
+        [inseto, metal],
+        [psiquico],
+        [fogo],
+        [gelo, terra]
+    ]
+).
+
 %==========================================================================
 % FATOS/TIPOS:
 %==========================================================================
 
-% Elétrico
+%--------------------------------------------------------------------------
+% ataque_super_efetivo(Atacante, Alvo)
+%--------------------------------------------------------------------------
 
+% Elétrico
 ataque_super_efetivo(eletrico, agua).
 ataque_super_efetivo(eletrico, voador).
 
-ataque_pouco_efetivo(eletrico, eletrico).
-ataque_pouco_efetivo(eletrico, grama).
-ataque_pouco_efetivo(eletrico, dragao).
-
-ataque_sem_efeito(eletrico, terra).
-
 % Metal
-
 ataque_super_efetivo(metal, fada).
 ataque_super_efetivo(metal, gelo).
 ataque_super_efetivo(metal, pedra).
 
-ataque_pouco_efetivo(metal, fogo).
-ataque_pouco_efetivo(metal, agua).
-ataque_pouco_efetivo(metal, eletrico).
-ataque_pouco_efetivo(metal, metal).
-
 % Terra
-
 ataque_super_efetivo(terra, metal).
 ataque_super_efetivo(terra, eletrico).
 ataque_super_efetivo(terra, fogo).
 ataque_super_efetivo(terra, pedra).
 ataque_super_efetivo(terra, veneno).
 
-ataque_pouco_efetivo(terra, grama).
-ataque_pouco_efetivo(terra, inseto).
-
-ataque_sem_efeito(terra, voador).
-
 % Gelo
-
 ataque_super_efetivo(gelo, dragao).
 ataque_super_efetivo(gelo, grama).
 ataque_super_efetivo(gelo, terra).
 ataque_super_efetivo(gelo, voador).
 
-ataque_pouco_efetivo(gelo, metal).
-ataque_pouco_efetivo(gelo, agua).
-ataque_pouco_efetivo(gelo, fogo).
-ataque_pouco_efetivo(gelo, gelo).
-
 % Pedra
-
 ataque_super_efetivo(pedra, fogo).
 ataque_super_efetivo(pedra, gelo).
 ataque_super_efetivo(pedra, inseto).
 ataque_super_efetivo(pedra, voador).
 
-ataque_pouco_efetivo(pedra, metal).
-ataque_pouco_efetivo(pedra, lutador).
-ataque_pouco_efetivo(pedra, terra).
-
 % Dragão
-
 ataque_super_efetivo(dragao, dragao).
 
-ataque_pouco_efetivo(dragao, metal).
-
-ataque_sem_efeito(dragao, fada).
-
 % Voador
-
 ataque_super_efetivo(voador, grama).
 ataque_super_efetivo(voador, lutador).
 ataque_super_efetivo(voador, inseto).
 
-ataque_pouco_efetivo(voador, eletrico).
-ataque_pouco_efetivo(voador, pedra).
-ataque_pouco_efetivo(voador, metal).
-
 % Lutador
-
 ataque_super_efetivo(lutador, normal).
 ataque_super_efetivo(lutador, gelo).
 ataque_super_efetivo(lutador, pedra).
 ataque_super_efetivo(lutador, sombrio).
 ataque_super_efetivo(lutador, metal).
 
+% Fogo
+ataque_super_efetivo(fogo, grama).
+ataque_super_efetivo(fogo, gelo).
+ataque_super_efetivo(fogo, inseto).
+ataque_super_efetivo(fogo, metal).
+
+% Grama
+ataque_super_efetivo(grama, agua).
+ataque_super_efetivo(grama, terra).
+ataque_super_efetivo(grama, pedra).
+
+% Água
+ataque_super_efetivo(agua, fogo).
+ataque_super_efetivo(agua, terra).
+ataque_super_efetivo(agua, pedra).
+
+% Fantasma
+ataque_super_efetivo(fantasma, psiquico).
+ataque_super_efetivo(fantasma, fantasma).
+
+% Inseto
+ataque_super_efetivo(inseto, grama).
+ataque_super_efetivo(inseto, psiquico).
+ataque_super_efetivo(inseto, sombrio).
+
+% Fada
+ataque_super_efetivo(fada, lutador).
+ataque_super_efetivo(fada, dragao).
+ataque_super_efetivo(fada, sombrio).
+
+% Psíquico
+ataque_super_efetivo(psiquico, lutador).
+ataque_super_efetivo(psiquico, veneno).
+
+% Veneno
+ataque_super_efetivo(veneno, grama).
+ataque_super_efetivo(veneno, fada).
+
+% Sombrio
+ataque_super_efetivo(sombrio, psiquico).
+ataque_super_efetivo(sombrio, fantasma).
+
+% (Normal não tem nenhum ataque super efetivo)
+
+%--------------------------------------------------------------------------
+% ataque_pouco_efetivo(Atacante, Alvo)
+%--------------------------------------------------------------------------
+
+% Elétrico
+ataque_pouco_efetivo(eletrico, eletrico).
+ataque_pouco_efetivo(eletrico, grama).
+ataque_pouco_efetivo(eletrico, dragao).
+
+% Metal
+ataque_pouco_efetivo(metal, fogo).
+ataque_pouco_efetivo(metal, agua).
+ataque_pouco_efetivo(metal, eletrico).
+ataque_pouco_efetivo(metal, metal).
+
+% Terra
+ataque_pouco_efetivo(terra, grama).
+ataque_pouco_efetivo(terra, inseto).
+
+% Gelo
+ataque_pouco_efetivo(gelo, metal).
+ataque_pouco_efetivo(gelo, agua).
+ataque_pouco_efetivo(gelo, fogo).
+ataque_pouco_efetivo(gelo, gelo).
+
+% Pedra
+ataque_pouco_efetivo(pedra, metal).
+ataque_pouco_efetivo(pedra, lutador).
+ataque_pouco_efetivo(pedra, terra).
+
+% Dragão
+ataque_pouco_efetivo(dragao, metal).
+
+% Voador
+ataque_pouco_efetivo(voador, eletrico).
+ataque_pouco_efetivo(voador, pedra).
+ataque_pouco_efetivo(voador, metal).
+
+% Lutador
 ataque_pouco_efetivo(lutador, veneno).
 ataque_pouco_efetivo(lutador, voador).
 ataque_pouco_efetivo(lutador, psiquico).
 ataque_pouco_efetivo(lutador, inseto).
 ataque_pouco_efetivo(lutador, fada).
 
-ataque_sem_efeito(lutador, fantasma).
-
 % Fogo
-
-ataque_super_efetivo(fogo, grama).
-ataque_super_efetivo(fogo, gelo).
-ataque_super_efetivo(fogo, inseto).
-ataque_super_efetivo(fogo, metal).
-
 ataque_pouco_efetivo(fogo, fogo).
 ataque_pouco_efetivo(fogo, agua).
 ataque_pouco_efetivo(fogo, pedra).
 ataque_pouco_efetivo(fogo, dragao).
 
 % Grama
-
-ataque_super_efetivo(grama, agua).
-ataque_super_efetivo(grama, terra).
-ataque_super_efetivo(grama, pedra).
-
 ataque_pouco_efetivo(grama, fogo).
 ataque_pouco_efetivo(grama, grama).
 ataque_pouco_efetivo(grama, veneno).
@@ -121,30 +176,14 @@ ataque_pouco_efetivo(grama, dragao).
 ataque_pouco_efetivo(grama, metal).
 
 % Água
-
-ataque_super_efetivo(agua, fogo).
-ataque_super_efetivo(agua, terra).
-ataque_super_efetivo(agua, pedra).
-
 ataque_pouco_efetivo(agua, agua).
 ataque_pouco_efetivo(agua, grama).
 ataque_pouco_efetivo(agua, dragao).
 
 % Fantasma
-
-ataque_super_efetivo(fantasma, psiquico).
-ataque_super_efetivo(fantasma, fantasma).
-
 ataque_pouco_efetivo(fantasma, sombrio).
 
-ataque_sem_efeito(fantasma, normal).
-
 % Inseto
-
-ataque_super_efetivo(inseto, grama).
-ataque_super_efetivo(inseto, psiquico).
-ataque_super_efetivo(inseto, sombrio).
-
 ataque_pouco_efetivo(inseto, fogo).
 ataque_pouco_efetivo(inseto, lutador).
 ataque_pouco_efetivo(inseto, veneno).
@@ -154,52 +193,41 @@ ataque_pouco_efetivo(inseto, metal).
 ataque_pouco_efetivo(inseto, fada).
 
 % Fada
-
-ataque_super_efetivo(fada, lutador).
-ataque_super_efetivo(fada, dragao).
-ataque_super_efetivo(fada, sombrio).
-
 ataque_pouco_efetivo(fada, fogo).
 ataque_pouco_efetivo(fada, veneno).
 ataque_pouco_efetivo(fada, metal).
 
 % Normal
-
 ataque_pouco_efetivo(normal, pedra).
 ataque_pouco_efetivo(normal, metal).
 
-ataque_sem_efeito(normal, fantasma).
-
 % Psíquico
-
-ataque_super_efetivo(psiquico, lutador).
-ataque_super_efetivo(psiquico, veneno).
-
 ataque_pouco_efetivo(psiquico, psiquico).
 ataque_pouco_efetivo(psiquico, metal).
 
-ataque_sem_efeito(psiquico, sombrio).
-
 % Veneno
-
-ataque_super_efetivo(veneno, grama).
-ataque_super_efetivo(veneno, fada).
-
 ataque_pouco_efetivo(veneno, veneno).
 ataque_pouco_efetivo(veneno, terra).
 ataque_pouco_efetivo(veneno, pedra).
 ataque_pouco_efetivo(veneno, fantasma).
 
-ataque_sem_efeito(veneno, metal).
-
 % Sombrio
-
-ataque_super_efetivo(sombrio, psiquico).
-ataque_super_efetivo(sombrio, fantasma).
-
 ataque_pouco_efetivo(sombrio, lutador).
 ataque_pouco_efetivo(sombrio, sombrio).
 ataque_pouco_efetivo(sombrio, fada).
+
+%--------------------------------------------------------------------------
+% ataque_sem_efeito(Atacante, Alvo)
+%--------------------------------------------------------------------------
+
+ataque_sem_efeito(eletrico, terra).
+ataque_sem_efeito(terra, voador).
+ataque_sem_efeito(dragao, fada).
+ataque_sem_efeito(lutador, fantasma).
+ataque_sem_efeito(fantasma, normal).
+ataque_sem_efeito(normal, fantasma).
+ataque_sem_efeito(psiquico, sombrio).
+ataque_sem_efeito(veneno, metal).
 
 % ==========================================================
 % CADASTRO DE POKEMON
@@ -321,32 +349,46 @@ resultado_ataque(A, [T], Resultado) :-
     efetividade_individual(A, T, Resultado).
 
 % ==========================================================
+% IDENTIFICACAO DOS TIPOS DO INTEGRANTE
+% ==========================================================
+
+% Quando recebe o nome de um Pokemon cadastrado
+
+tipos_integrante(Pokemon, Tipos) :-
+    atom(Pokemon),
+    pokemon(Pokemon, Tipos).
+
+% Quando recebe diretamente uma lista de tipos
+
+tipos_integrante(Tipos, Tipos) :-
+    is_list(Tipos).
+
+% ==========================================================
 % MELHOR PONTUACAO OFENSIVA
 % ==========================================================
 
 % a melhor pontuação ofensiva de um Pokémon contra outro Pokémon com maxlist q pega o de melhor tipo
 
-melhor_ataque(PokemonA, PokemonB, MelhorPontuacao) :-
+melhor_ataque(IntegranteA, IntegranteB, MelhorPontuacao) :-
 
-    pokemon(PokemonA, TiposA),
-    pokemon(PokemonB, TiposB),
+    tipos_integrante(IntegranteA, TiposA),
+    tipos_integrante(IntegranteB, TiposB),
 
     findall(
         Pontos,
         (
             member(TipoAtaque, TiposA),
-
             resultado_ataque(
                 TipoAtaque,
                 TiposB,
                 Resultado
             ),
-
             pontuacao(Resultado, Pontos)
         ),
         Pontuacoes
     ),
 
+    Pontuacoes \= [],
     max_list(Pontuacoes, MelhorPontuacao).
 
 % ==========================================================
@@ -422,16 +464,42 @@ pontuacao_time(Time, TimeAdversario, Total) :-
 % ==========================================================
 
 % 6 pokemons unicos
+% tabela dos tipos validos
+
+tipos_validos([
+    eletrico, metal, terra, gelo, pedra, dragao,
+    voador, lutador, fogo, grama, agua, fantasma,
+    inseto, fada, normal, psiquico, veneno, sombrio
+]).
+
+% verifica na tabela se o tipo existe
+
+tipo_cadastrado(Tipo) :-
+    tipos_validos(Tipos),
+    member(Tipo, Tipos).
+
+% valida se o integrante tem 1 ou 2 tipos e se eles existem na tabela    
+
+validar_integrante(Integrante) :-
+    tipos_integrante(Integrante, Tipos),
+    is_list(Tipos),
+    length(Tipos, Quantidade),
+    Quantidade >= 1,
+    Quantidade =< 2,
+    forall(
+        member(Tipo, Tipos),
+        tipo_cadastrado(Tipo)
+    ).
+
+% valida se o time tem 6 integrantes e se cada um é valido
 
 validar_time(Time) :-
-
     is_list(Time),
-
     length(Time, 6),
-
-    sort(Time, Unicos),
-
-    length(Unicos, 6),
+    forall(
+        member(Integrante, Time),
+        validar_integrante(Integrante)
+    ).
 
 % ==========================================================
 % RELATORIO DE PONTUACAO INDIVIDUAL
@@ -457,18 +525,21 @@ relatorio_pokemon([Pokemon | Resto], Adversarios) :-
 
 % contra determinado tipo de ataque.
 
-contar_fraquezas_time(Time, TipoAtaque, Total, PokemonFracos) :-
+contar_fraquezas_time(Time, TipoAtaque, Total, IntegrantesFracos) :-
 
     findall(
-        Pokemon,
+        Integrante,
         (
-            member(Pokemon, Time),
-            pokemon(Pokemon, Tipos),
+            member(Integrante, Time),
+
+            tipos_integrante(Integrante, Tipos),
+
             resultado_ataque(
                 TipoAtaque,
                 Tipos,
                 Resultado
             ),
+
             (
                 Resultado = super_efetivo;
                 Resultado = muito_efetivo
@@ -477,8 +548,9 @@ contar_fraquezas_time(Time, TipoAtaque, Total, PokemonFracos) :-
         Lista
     ),
 
-    sort(Lista, PokemonFracos),
-    length(PokemonFracos, Total).
+    sort(Lista, IntegrantesFracos),
+
+    length(IntegrantesFracos, Total).
 
 
 % gera uma lista com as fraquezas
